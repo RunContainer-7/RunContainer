@@ -113,6 +113,13 @@ export function isDirectInstall(entry) {
   return Boolean(entry?.directInstall && entry?.installerUrl) && /^https:\/\//i.test(entry.installerUrl);
 }
 
+// Where a submission goes: the repository's issue form. A submission is a link and
+// its details, not a file, for the same reason the catalogue only links to publishers:
+// RunContainer never collects or redistributes an installer, and an issue cannot
+// carry a 100 MB setup file anyway.
+export const STORE_SUBMISSION_URL =
+  'https://github.com/RunContainer-7/RunContainer/issues/new?template=submit-app.yml';
+
 export function storeEntryById(id) {
   return EXE_STORE.find((entry) => entry.id === id) || null;
 }

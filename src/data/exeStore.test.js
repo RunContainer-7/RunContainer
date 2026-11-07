@@ -1,4 +1,4 @@
-const { EXE_STORE, isDirectInstall, storeEntryById, storeCategories } = require("./exeStore");
+const { EXE_STORE, STORE_SUBMISSION_URL, isDirectInstall, storeEntryById, storeCategories } = require("./exeStore");
 
 describe("EXE Store catalogue", () => {
   it("has a unique, stable id and a name for every entry", () => {
@@ -38,6 +38,15 @@ describe("EXE Store catalogue", () => {
     expect(isDirectInstall({ installerUrl: "http://example.com/app.exe", directInstall: true })).toBe(false);
     expect(isDirectInstall({ installerUrl: "https://example.com/app.exe" })).toBe(false);
     expect(isDirectInstall({ installerUrl: "https://example.com/app.exe", directInstall: true })).toBe(true);
+  });
+
+  it("sends submissions to the repository's issue form, over https", () => {
+    // A submission is a link and its details, not a file. If this ever becomes a form
+    // endpoint or a mailbox, the store's promise about not collecting installers has
+    // to be re-decided rather than quietly inherited.
+    expect(STORE_SUBMISSION_URL).toBe(
+      "https://github.com/RunContainer-7/RunContainer/issues/new?template=submit-app.yml",
+    );
   });
 
   it("builds the filter list from the entries themselves", () => {

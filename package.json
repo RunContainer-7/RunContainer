@@ -1,7 +1,7 @@
 {
   "name": "RunContainer",
   "productName": "RunContainer",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "A Windows-based container management application for running applications in a sandboxed environment.",
   "main": "public/main.js",
   "scripts": {
@@ -10,6 +10,7 @@
     "start:react": "node --openssl-legacy-provider ./node_modules/react-scripts/scripts/start.js",
     "build": "node --openssl-legacy-provider ./node_modules/react-scripts/scripts/build.js",
     "test": "react-scripts test",
+    "store:verify": "node scripts/verify-store-link.js",
     "eject": "react-scripts eject",
     "electron": "electron .",
     "package:exe": "npm run build && electron-builder --win nsis --x64 --publish never",

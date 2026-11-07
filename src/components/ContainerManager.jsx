@@ -3,6 +3,7 @@ import { installContainer, importFromUrl, runContainer, killContainer, resetCont
 import useContainers from "../hooks/useContainers";
 import BeginnerSetup from "./BeginnerSetup";
 import ExeStore from "./ExeStore";
+import { STORE_SUBMISSION_URL } from "../data/exeStore";
 import CompanionQr from "./CompanionQr";
 import VirtualiseTab from "./VirtualiseTab";
 import { UPDATES } from "../data/updates";
@@ -45,7 +46,7 @@ function useBootAnimation() {
 // Used only until the main process reports the version from package.json.
 // Shown only for the moment before the main process reports the real version; the
 // test asserts that it tracks package.json, so it must be bumped with the release.
-const APP_VERSION_FALLBACK = "0.10.0";
+const APP_VERSION_FALLBACK = "0.11.0";
 // "4m 07s" - how long a setup has been running, for the one place a long wait
 // needs to be explained rather than look frozen.
 function formatElapsed(ms) {
@@ -702,6 +703,13 @@ export default function ContainerManager() {
 
   // No verified installer link means no download here. Opening the publisher's page is the
   // honest version of that, and the message says what to do next.
+  // A submission is a link and its details, never an uploaded installer: the form is a
+  // GitHub issue so the review happens in public, next to the entry it produces.
+  function handleStoreSubmitApp() {
+    setStoreMessage("Opening the app submission form in your browser. It asks for the publisher's link — do not attach an installer.");
+    Promise.resolve(openExternalUrl(STORE_SUBMISSION_URL)).catch(() => {});
+  }
+
   function handleStoreOpenPage(entry) {
     if (!entry?.downloadPage) return;
     setStoreMessage(`Opening the official download page for ${entry.name}. Save the installer, then use Install local EXE.`);
@@ -2344,6 +2352,7 @@ export default function ContainerManager() {
           onClose={() => setShowExeStore(false)}
           onInstall={handleStoreInstall}
           onOpenPage={handleStoreOpenPage}
+          onSubmitApp={handleStoreSubmitApp}
           busyId={storeBusyId}
           message={storeMessage}
           installedNames={appContainers.map((container) => container.name)}

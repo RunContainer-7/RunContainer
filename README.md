@@ -81,6 +81,7 @@ When a newer release in the same channel exists, the app shows the changes and a
 If RunContainer is useful to you, the easiest way to help is to [star the project on GitHub](https://github.com/RunContainer-7/runcontainer).
 
 - Documentation and guides: https://runcontainer-7.github.io/9-runcontainer/
+- Submit an app to the EXE Store: [submission form](https://github.com/RunContainer-7/RunContainer/issues/new?template=submit-app.yml) — a publisher link and its details, never an uploaded installer.
 - Discord, for help and feature requests: https://discord.gg/UKTGRMMmC4
 - YouTube, for walkthroughs and demos: https://m.youtube.com/@RunContainer
 - Bugs and ideas: [open an issue](https://github.com/RunContainer-7/runcontainer/issues)

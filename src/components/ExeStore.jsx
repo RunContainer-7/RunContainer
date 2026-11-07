@@ -11,7 +11,7 @@ import { EXE_STORE, isDirectInstall, storeCategories } from "../data/exeStore";
 // Entries without a verified direct link say "Get installer" and open the publisher's
 // page. That is deliberate: a store button that 404s is worse than an honest trip to the
 // vendor, and RunContainer does not host or mirror other people's installers.
-export default function ExeStore({ onClose, onInstall, onOpenPage, busyId, message, installedNames = [] }) {
+export default function ExeStore({ onClose, onInstall, onOpenPage, onSubmitApp, busyId, message, installedNames = [] }) {
   const [category, setCategory] = useState("All");
   const categories = useMemo(() => storeCategories(), []);
   const visible = useMemo(
@@ -98,10 +98,12 @@ export default function ExeStore({ onClose, onInstall, onOpenPage, busyId, messa
 
         <div className="beginner-footer">
           <p className="beginner-foot-note muted">
-            Links go to the publisher, not to a RunContainer mirror. Nothing is installed
+            Links go to the publisher, not to a RunContainer mirror, and a submitted app is
+            reviewed by hand before it appears here. Nothing is installed
             into the rest of Windows.
           </p>
           <div className="detail-actions">
+            <button className="settings-button ghost" onClick={onSubmitApp}>Submit an app</button>
             <button className="settings-button ghost" onClick={onClose}>Close</button>
           </div>
         </div>

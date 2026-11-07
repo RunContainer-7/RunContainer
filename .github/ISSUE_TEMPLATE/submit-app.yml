@@ -1,0 +1,119 @@
+name: Submit an app to the EXE Store
+description: Suggest a Windows program for the store. Link to the publisher's installer — do not attach one.
+title: "[App] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The EXE Store only links to a **publisher's own installer**. It never hosts,
+        mirrors or repackages one.
+
+        **Do not attach or upload an `.exe`.** Attachments are not how submissions
+        work and they are removed unread. What a reviewer needs is the official
+        download address, so the same file every user gets can be fetched and
+        checked.
+
+        A submission is a suggestion, not a promise: the team checks the link, the
+        licence and the publisher before an entry is added, and a declined app is
+        not a claim that it is unsafe.
+
+  - type: input
+    id: app-name
+    attributes:
+      label: App name
+      description: The name the publisher uses.
+      placeholder: Notepad++
+    validations:
+      required: true
+
+  - type: input
+    id: publisher
+    attributes:
+      label: Publisher
+      description: The company or person who makes and distributes the app.
+      placeholder: Don Ho
+    validations:
+      required: true
+
+  - type: input
+    id: download-page
+    attributes:
+      label: Official download page
+      description: The publisher's own page, over https. This is what the store opens when there is no stable installer link.
+      placeholder: https://notepad-plus-plus.org/downloads/
+    validations:
+      required: true
+
+  - type: input
+    id: installer-url
+    attributes:
+      label: Direct installer link (optional)
+      description: Only if the publisher has a stable https address that answers with the installer itself. A link that redirects to a version-specific file, or to a mirror, is not one.
+      placeholder: https://www.7-zip.org/a/7z2501-x64.exe
+
+  - type: input
+    id: version
+    attributes:
+      label: Version you checked
+      description: The version that link gave you when you tried it.
+      placeholder: 8.7.1
+    validations:
+      required: true
+
+  - type: input
+    id: sha256
+    attributes:
+      label: SHA-256 of the installer (optional)
+      description: If you ran the file, the hash of what you actually downloaded. A reviewer recomputes it rather than trusting it.
+      placeholder: 64 hexadecimal characters
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Where it would sit in the store.
+      options:
+        - Browsers
+        - Editors
+        - Media
+        - Utilities
+        - Development
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: license
+    attributes:
+      label: Licence
+      description: How the app is licensed, as the publisher states it.
+      placeholder: GPL-3.0
+
+  - type: input
+    id: size
+    attributes:
+      label: Approximate installer size (MB)
+      description: Used for the size shown on the store card.
+      placeholder: 6
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why should it be in the store?
+      description: What someone would install it for, and anything that makes it awkward to run contained (installers that need a reboot, drivers, a separate download step).
+      placeholder: It is the default editor for a lot of people, and the installer needs no reboot.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Before you submit
+      options:
+        - label: The link above is the publisher's own, not a mirror, repack, crack or patch.
+          required: true
+        - label: I have not attached the installer, and I understand attachments are removed.
+          required: true
+        - label: I understand the team reviews this by hand and may decline it, or add it without the one-press Install button.
+          required: true
+        - label: I am the publisher, or I am suggesting someone else's app without being asked to by them. (Tick whichever is true — say which in the box above.)

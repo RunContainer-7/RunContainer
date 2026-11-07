@@ -4,6 +4,17 @@
 
 export const UPDATES = [
   {
+    version: '0.11.0',
+    date: '2026-11-07',
+    title: 'Submit an app to the EXE Store',
+    changes: [
+      'The EXE Store has a Submit an app button. It opens a submission form in your browser; the form asks for the app\u2019s name, its publisher, the official download page and, where one exists, a direct installer link over https.',
+      'A submission is a link and its details, not an uploaded file. RunContainer does not collect or redistribute installers, so attaching one is not part of the process and the form says so before anyone types anything.',
+      'Every submission is reviewed by hand before it appears: the link is fetched the way the app fetches it, and the status, size and SHA-256 that come back are what decide between a one-press Install and a Get installer entry that opens the publisher\u2019s page.',
+      'Reviewing uses a new tool, npm run store:verify, which fetches a submitted address without saving it and prints the catalogue entry it would produce.',
+    ],
+  },
+  {
     version: '0.10.0',
     date: '2026-11-07',
     title: 'An EXE Store next to the + button',
