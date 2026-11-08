@@ -17,6 +17,11 @@ body:
         licence and the publisher before an entry is added, and a declined app is
         not a claim that it is unsafe.
 
+        Before you send it, read [what an app must meet](https://runcontainer-7.github.io/9-runcontainer/user-guide/exe-store#what-an-app-must-meet).
+        If something is unclear, ask on the [Discord server](https://discord.gg/rvMjMZJykE).
+        Submissions still go through this form rather than a message or a DM: the
+        issue is the record of what was checked and what was decided.
+
   - type: input
     id: app-name
     attributes:
@@ -115,5 +120,7 @@ body:
         - label: I have not attached the installer, and I understand attachments are removed.
           required: true
         - label: I understand the team reviews this by hand and may decline it, or add it without the one-press Install button.
+          required: true
+        - label: I have read what an app must meet, and this app meets those criteria.
           required: true
         - label: I am the publisher, or I am suggesting someone else's app without being asked to by them. (Tick whichever is true — say which in the box above.)
