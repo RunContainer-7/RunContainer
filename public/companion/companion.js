@@ -586,16 +586,43 @@
   // already installed (standalone), and never shown again after it is dismissed.
   const INSTALL_KEY = 'rc-companion-install-seen';
   const installTip = document.getElementById('install-tip');
+  const installSteps = document.getElementById('install-steps');
+  const installAddress = document.getElementById('install-address');
   const standalone = Boolean(window.navigator.standalone)
     || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  // A local http address is neither secure nor stable: iOS cannot keep a copy of the page
+  // for it, and it ties the icon to an address that changes with the network. Say so where
+  // the person is about to add the icon, instead of letting them find out later.
+  const localAddress = location.protocol !== 'https:';
+  if (localAddress && installAddress) {
+    installAddress.textContent = 'This is a local address. iOS ties the icon to it, so it stops opening when the PC is off, is given a new address, or the phone is on another network. Settings \u2192 iPhone companion \u2192 Web address gives an https:// address, and an icon added from that one opens even when the PC is away.';
+    installAddress.hidden = false;
+  }
   let seenInstall = false;
   try { seenInstall = localStorage.getItem(INSTALL_KEY) === '1'; } catch (error) { /* private mode */ }
-  if (installTip && !standalone && !seenInstall) {
+  // Already added from a local address: the Share steps would be wrong here, but the
+  // person still needs telling once, or the icon quietly dies on them.
+  const nudgeLocal = standalone && localAddress && !seenInstall;
+  if (installTip && ((!standalone && !seenInstall) || nudgeLocal)) {
     installTip.hidden = false;
+    if (standalone && installSteps) {
+      installSteps.hidden = true;
+      const title = document.getElementById('install-title');
+      if (title) title.textContent = 'This icon only works on this network';
+    }
     document.getElementById('install-dismiss').addEventListener('click', () => {
       installTip.hidden = true;
       try { localStorage.setItem(INSTALL_KEY, '1'); } catch (error) { /* private mode */ }
     });
+  }
+
+  // Opening the Home Screen icon while the PC is off used to land on Safari's own error
+  // page, because there was nothing on the phone to answer. On an https address the page
+  // now answers from its cache and shows the last list the PC sent. A local http address
+  // is not a secure origin, so iOS will not allow a worker there at all — hence the note
+  // above, and the https address in Settings.
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
 
   applyTheme(preferredTheme());

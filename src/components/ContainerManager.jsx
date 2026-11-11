@@ -46,7 +46,7 @@ function useBootAnimation() {
 // Used only until the main process reports the version from package.json.
 // Shown only for the moment before the main process reports the real version; the
 // test asserts that it tracks package.json, so it must be bumped with the release.
-const APP_VERSION_FALLBACK = "0.11.0";
+const APP_VERSION_FALLBACK = "0.11.1";
 // "4m 07s" - how long a setup has been running, for the one place a long wait
 // needs to be explained rather than look frozen.
 function formatElapsed(ms) {
@@ -1639,8 +1639,8 @@ export default function ContainerManager() {
                     ) : companion.web?.signedIn ? (
                       <>
                         <span className="muted">
-                          Open an https://…ts.net address for the phone. It works away from home, and the QR code above
-                          switches to it.
+                          Open an https://…ts.net address for the phone. It works away from home, the QR code above
+                          switches to it, and it is the address to add to the Home Screen.
                         </span>
                         <div className="detail-actions">
                           <button

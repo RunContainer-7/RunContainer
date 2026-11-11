@@ -94,6 +94,26 @@ describe('companion appearance', () => {
     expect(script).toMatch(/setOffline\(true\)/);
   });
 
+  it('keeps a copy of the page so a Home Screen icon opens when the PC is off', () => {
+    const sw = fs.readFileSync(path.join(COMPANION, 'sw.js'), 'utf8');
+    // A versioned cache name is how an old page is thrown away after an update.
+    expect(sw).toMatch(/const CACHE = 'rc-companion-shell-v\d+'/);
+    expect(sw).toMatch(/caches\.open\(CACHE\)/);
+    // A navigation is tried on the network, then answered from the cache.
+    expect(sw).toMatch(/request\.mode === 'navigate'/);
+    expect(sw).toContain("cache.match('/')");
+    // Pairing, state and the socket are live facts: never cached.
+    expect(sw).toContain("url.pathname.startsWith('/api/')");
+    const script = fs.readFileSync(path.join(COMPANION, 'companion.js'), 'utf8');
+    // Only on https: a local http address is not a secure origin, so iOS refuses it.
+    expect(script).toMatch(/location\.protocol === 'https:'/);
+    expect(script).toContain("serviceWorker.register('/sw.js')");
+    const html = fs.readFileSync(path.join(COMPANION, 'index.html'), 'utf8');
+    // The sheet that adds the icon says a local address is the thing that breaks it.
+    expect(html).toContain('id="install-address"');
+    expect(html).toContain('id="install-steps"');
+  });
+
   it('keeps RunContainer running when its window is closed and the companion is on', () => {
     const main = fs.readFileSync(path.join(ROOT, 'public', 'main.js'), 'utf8');
     expect(main).toMatch(/mainWindow\.on\('close'/);

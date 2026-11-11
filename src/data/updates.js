@@ -4,6 +4,16 @@
 
 export const UPDATES = [
   {
+    version: '0.11.1',
+    date: '2026-11-07',
+    title: 'The companion opens when the PC is away',
+    changes: [
+      'A Home Screen icon added from the companion’s web address now opens even when the PC is off, asleep or unreachable: the page is kept on the phone, says the PC is not reachable, and shows the last list of apps it sent, instead of Safari’s “the server cannot be found”.',
+      'That copy only exists on a secure address, so it covers https://…ts.net and not a local http://192.168.… one. The Add to Home Screen sheet now says so when the page is opened over a local address.',
+      'An icon that was already added from a local address is told once, the next time it opens, that it is tied to that network — rather than failing silently the next time the PC’s address changes.',
+    ],
+  },
+  {
     version: '0.11.0',
     date: '2026-11-07',
     title: 'Submit an app to the EXE Store',
