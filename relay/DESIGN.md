@@ -82,6 +82,13 @@ account, or Tailscale.
 | A malicious page on our origin | Cannot mint a ticket without a phone token; tickets are same-origin only |
 | Relay operator (us) reading frames | Accepted in phase 1; removed by phase 4 E2E |
 
+**Where a wrong guess is charged.** A wrong code matches no row, so there is no pairing to
+attach it to. Every live code therefore takes the hit: eight wrong claims delete the pending
+pairing and the PC shows *ask for a new code*. The cost is that somebody hammering the claim
+endpoint can cancel a code that was about to be used — a nuisance, visible on the PC, fixed
+by pressing once. The alternative, leaving the code alive while it is being guessed at, trades
+a nuisance for an opening. The per-address hourly cap still applies underneath.
+
 ## Failure modes
 
 - **Relay unreachable** — the phone says so and keeps its last snapshot; the PC shows the

@@ -148,6 +148,64 @@ test('one address cannot walk six digits: the hourly limit stops it', async () =
   assert.equal(limited, true);
 });
 
+test('eight wrong codes end the pairing, so the real code no longer works', async () => {
+  const env = await registered();
+  const start = await env.call('/api/pair/start', { method: 'POST', headers: env.headers });
+  const { code } = await start.json();
+
+  let wrong = '000000';
+  for (let attempt = 0; attempt < LIMITS.MAX_CODE_ATTEMPTS; attempt += 1) {
+    if (wrong === code) wrong = '999999';
+    const response = await env.call('/api/pair/claim', {
+      method: 'POST',
+      body: { code: wrong },
+      // A different address each time, so the hourly per-address cap cannot be what stops it.
+      headers: { 'cf-connecting-ip': `10.0.0.${attempt}` },
+    });
+    assert.equal(response.status, 404);
+  }
+
+  const real = await env.call('/api/pair/claim', {
+    method: 'POST',
+    body: { code },
+    headers: { 'cf-connecting-ip': '10.0.0.200' },
+  });
+  assert.equal(real.status, 404, 'the code was burned by the guessing');
+
+  // The PC can always put a fresh code on screen.
+  const fresh = await env.call('/api/pair/start', { method: 'POST', headers: env.headers });
+  assert.equal(fresh.status, 200);
+  const freshClaim = await env.call('/api/pair/claim', {
+    method: 'POST',
+    body: { code: (await fresh.json()).code },
+    headers: { 'cf-connecting-ip': '10.0.0.201' },
+  });
+  assert.equal(freshClaim.status, 200);
+});
+
+test('seven wrong codes leave the pairing alive', async () => {
+  const env = await registered();
+  const start = await env.call('/api/pair/start', { method: 'POST', headers: env.headers });
+  const { code } = await start.json();
+
+  let wrong = '000000';
+  for (let attempt = 0; attempt < LIMITS.MAX_CODE_ATTEMPTS - 1; attempt += 1) {
+    if (wrong === code) wrong = '999999';
+    await env.call('/api/pair/claim', {
+      method: 'POST',
+      body: { code: wrong },
+      headers: { 'cf-connecting-ip': `10.1.0.${attempt}` },
+    });
+  }
+
+  const real = await env.call('/api/pair/claim', {
+    method: 'POST',
+    body: { code },
+    headers: { 'cf-connecting-ip': '10.1.0.200' },
+  });
+  assert.equal(real.status, 200);
+});
+
 test('a ticket names the room and the role for each side', async () => {
   const { call, headers, claimBody } = await paired();
   const pc = await (await call('/api/ticket', { method: 'POST', headers })).json();

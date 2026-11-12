@@ -38,6 +38,13 @@ export function createMemoryStore() {
     async deletePairCode(id) {
       pairCodes.delete(id);
     },
+    async recordFailedClaim(at, maxAttempts) {
+      for (const [id, row] of pairCodes) {
+        if (row.expiresAt <= at) continue;
+        row.attempts += 1;
+        if (row.attempts >= maxAttempts) pairCodes.delete(id);
+      }
+    },
 
     async putPhone(phone) {
       phones.set(phone.id, { ...phone });
@@ -112,6 +119,12 @@ export function createD1Store(db) {
     },
     async deletePairCode(id) {
       await run('DELETE FROM pair_codes WHERE id = ?', id);
+    },
+    // Two statements, both here rather than in the route: a failed guess is charged to every
+    // code that is still live, and the ones that reach the cap are removed in the same call.
+    async recordFailedClaim(at, maxAttempts) {
+      await run('UPDATE pair_codes SET attempts = attempts + 1 WHERE expires_at > ?', at);
+      await run('DELETE FROM pair_codes WHERE attempts >= ?', maxAttempts);
     },
 
     async putPhone(phone) {

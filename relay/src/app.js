@@ -151,7 +151,13 @@ export function createRelayHandler({ store, secrets, now = () => Date.now(), log
     }
 
     const row = await store.getPairCodeByHash(await pairCodeHash(code));
-    if (!row) return json(404, { error: 'That code is not the one shown on the PC.' });
+    if (!row) {
+      // A wrong code names nothing: there is no row to charge it to, so the guess is counted
+      // against every live code. Eight wrong tries end the pending pairing instead of leaving
+      // a code standing while somebody walks the six digits.
+      await store.recordFailedClaim(at, LIMITS.MAX_CODE_ATTEMPTS);
+      return json(404, { error: 'That code is not the one shown on the PC.' });
+    }
     if (row.expiresAt <= at) {
       await store.deletePairCode(row.id);
       return json(410, { error: 'That code has expired. Ask the PC for a new one.' });

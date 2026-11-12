@@ -19,7 +19,7 @@
     "premake": "npm run build",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "relay:test": "node --test relay/test/pairing.test.js relay/test/routes.test.js"
+    "relay:test": "node --test relay/test/pairing.test.js relay/test/routes.test.js relay/test/d1.sqlite.test.js"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",
