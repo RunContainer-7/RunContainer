@@ -18,7 +18,8 @@
     "prepackage": "npm run build",
     "premake": "npm run build",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "relay:test": "node --test relay/test/pairing.test.js relay/test/routes.test.js"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",
