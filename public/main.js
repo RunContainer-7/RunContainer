@@ -84,6 +84,7 @@ const { createExperienceStore } = require('../src/ai/experiences');
 const { extractIconToFile } = require('../src/services/exeIcon');
 const { createCompanionServer } = require('../src/services/companionServer');
 const { createTailscaleFunnel } = require('../src/services/tailscaleFunnel');
+const { createCompanionRelay } = require('../src/services/companionRelay');
 const { buildCompanionInputProgram, commandFor } = require('./companion-input');
 const { planSetupRun, findInstalledCandidates } = require('../src/services/setupInstall');
 const repairVerification = require('../src/utils/repairVerifier');
@@ -5751,6 +5752,75 @@ async function refreshCompanionWebProbe() {
   return companionWebProbe;
 }
 
+// ---------------------------------------------------------------- hosted relay ---
+// The PC dials out to a relay, so the phone can open a fixed address with no port and no
+// home network. Off until it is turned on here; nothing is opened or registered otherwise.
+let companionRelay = null;
+let companionRelayCode = null;
+
+function relayLog(text) {
+  appendLog(path.join(app.getPath('userData'), 'runcontainer-companion.log'), text);
+}
+
+function stopCompanionRelay() {
+  if (!companionRelay) return;
+  try {
+    companionRelay.disconnect();
+  } catch (error) {
+    // A relay that is already gone needs nothing from us.
+  }
+  companionRelay = null;
+  companionRelayCode = null;
+}
+
+async function startCompanionRelay(address) {
+  const url = String(address || '').trim().replace(/\/+$/, '');
+  if (!/^https?:\/\//i.test(url)) return { ok: false, error: 'The relay address must start with https://' };
+  stopCompanionRelay();
+  const relay = createCompanionRelay({
+    baseUrl: url,
+    loadState: () => loadCompanionState().relay || {},
+    saveState: (state) => saveCompanionState({ relay: state }),
+    logger: relayLog,
+  });
+  relay.on('open', () => {
+    saveCompanionState({ relayError: '' });
+    emitCompanionStatus();
+  });
+  relay.on('close', () => emitCompanionStatus());
+  relay.on('unauthorised', () => {
+    // Retrying would hammer a relay that has forgotten this PC.
+    stopCompanionRelay();
+    saveCompanionState({ relayEnabled: false, relayError: 'The relay no longer recognises this PC. Turn remote access on again to register it.' });
+    emitCompanionStatus();
+  });
+  companionRelay = relay;
+
+  const registered = await relay.ensureRegistered();
+  if (!registered.ok) {
+    const error = registered.error || 'The relay could not be reached.';
+    stopCompanionRelay();
+    saveCompanionState({ relayEnabled: false, relayUrl: url, relayError: error });
+    emitCompanionStatus();
+    return { ok: false, error };
+  }
+
+  saveCompanionState({ relayUrl: url, relayEnabled: true, relayError: '' });
+  const pairing = await relay.startPairing();
+  companionRelayCode = pairing.ok ? { code: pairing.code, expiresAt: pairing.expiresAt } : null;
+  relay.connect().catch((error) => relayLog(`Relay connect failed: ${error.message}`));
+  emitCompanionStatus();
+  return { ok: pairing.ok, code: companionRelayCode?.code || null, error: pairing.ok ? '' : pairing.error };
+}
+
+async function requestCompanionRelayCode() {
+  if (!companionRelay) return { ok: false, error: 'Turn remote access on first.' };
+  const pairing = await companionRelay.startPairing();
+  companionRelayCode = pairing.ok ? { code: pairing.code, expiresAt: pairing.expiresAt } : null;
+  emitCompanionStatus();
+  return pairing;
+}
+
 function companionStatus() {
   const stored = loadCompanionState();
   const code = companionServer?.currentPairingCode() || null;
@@ -5773,6 +5843,14 @@ function companionStatus() {
       // Otherwise Safari gets a name that no longer serves anything.
       url: companionWebProbe.signedIn === true ? stored.webUrl || '' : '',
       error: stored.webError || companionWebProbe.error || '',
+    },
+    relay: {
+      enabled: stored.relayEnabled === true,
+      address: stored.relayUrl || '',
+      code: companionRelayCode?.code || null,
+      codeExpiresAt: companionRelayCode?.expiresAt || 0,
+      connected: Boolean(companionRelay?.status().connected),
+      error: stored.relayError || '',
     },
   };
 }
@@ -5824,6 +5902,10 @@ async function startCompanionServer() {
   // The companion is on, so the window may be closed without stopping it.
   ensureTray();
   emitCompanionStatus();
+  // Remote access is restored with the companion, using the address it was last given.
+  if (stored.relayEnabled && stored.relayUrl) {
+    startCompanionRelay(stored.relayUrl).catch((error) => relayLog(`Relay could not be restored: ${error.message}`));
+  }
   // The funnel points at a port, and the port can change when another program took the
   // saved one, so it is re-opened against the port the server actually got.
   if (stored.webEnabled) {
@@ -5846,6 +5928,8 @@ async function startCompanionServer() {
 }
 
 async function stopCompanionServer() {
+  stopCompanionRelay();
+  saveCompanionState({ relayEnabled: false });
   if (loadCompanionState().webEnabled) {
     try {
       await tailscaleFunnel.disable();
@@ -6085,6 +6169,23 @@ ipcMain.handle('companion-disable-web', async () => {
   } finally {
     companionWebBusy = false;
   }
+});
+
+ipcMain.handle('companion-relay-enable', async (_event, address) => {
+  const result = await startCompanionRelay(address);
+  return result.ok ? companionStatus() : { ...companionStatus(), error: result.error };
+});
+
+ipcMain.handle('companion-relay-disable', async () => {
+  stopCompanionRelay();
+  saveCompanionState({ relayEnabled: false, relayError: '' });
+  emitCompanionStatus();
+  return companionStatus();
+});
+
+ipcMain.handle('companion-relay-code', async () => {
+  const result = await requestCompanionRelayCode();
+  return result.ok ? companionStatus() : { ...companionStatus(), error: result.error };
 });
 
 // A new code invalidates the previous one, so seeing an old code on a photo is useless.

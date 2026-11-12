@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { installContainer, importFromUrl, runContainer, killContainer, resetContainer, duplicateContainer, exportContainer, getAppLogs, onContainerStatus, cancelDeleteContainer, setIsolationEngine, setWindowHosting, getAppVersion, getHyperVStatus, setAppConfig, setAppProfile, resetEnvironment, openGuestDisplay, checkAppUpdates, openUpdateLink, snoozeUpdate, downloadUpdate, cancelUpdateDownload, getUpdateState, installDownloadedUpdate, onUpdateDownloadProgress, getQemuStatus, detectQemu, getPerformance, openExternalUrl, repairAppEnvironment, getAiStatus, getAiHistory, getAiExperiences, promoteAiExperiences, rollbackAiModel, setAiMonitoring, onAiDiagnosis, onAiRepairResult, onAiRecovered, onAiUnavailable, onAiStatus, onAiHistory, onAiVerified, onSetupProgress, onSetupComplete, runContainerWithJit, getPreferences, setPreference, getCompanionStatus, enableCompanion, disableCompanion, newCompanionCode, forgetCompanionDevices, enableCompanionWeb, disableCompanionWeb, onCompanionStatus } from "../services/containerService";
+import { installContainer, importFromUrl, runContainer, killContainer, resetContainer, duplicateContainer, exportContainer, getAppLogs, onContainerStatus, cancelDeleteContainer, setIsolationEngine, setWindowHosting, getAppVersion, getHyperVStatus, setAppConfig, setAppProfile, resetEnvironment, openGuestDisplay, checkAppUpdates, openUpdateLink, snoozeUpdate, downloadUpdate, cancelUpdateDownload, getUpdateState, installDownloadedUpdate, onUpdateDownloadProgress, getQemuStatus, detectQemu, getPerformance, openExternalUrl, repairAppEnvironment, getAiStatus, getAiHistory, getAiExperiences, promoteAiExperiences, rollbackAiModel, setAiMonitoring, onAiDiagnosis, onAiRepairResult, onAiRecovered, onAiUnavailable, onAiStatus, onAiHistory, onAiVerified, onSetupProgress, onSetupComplete, runContainerWithJit, getPreferences, setPreference, getCompanionStatus, enableCompanion, disableCompanion, newCompanionCode, forgetCompanionDevices, enableCompanionWeb, disableCompanionWeb, enableCompanionRelay, disableCompanionRelay, newCompanionRelayCode, onCompanionStatus } from "../services/containerService";
 import useContainers from "../hooks/useContainers";
 import BeginnerSetup from "./BeginnerSetup";
 import ExeStore from "./ExeStore";
@@ -46,7 +46,7 @@ function useBootAnimation() {
 // Used only until the main process reports the version from package.json.
 // Shown only for the moment before the main process reports the real version; the
 // test asserts that it tracks package.json, so it must be bumped with the release.
-const APP_VERSION_FALLBACK = "0.11.1";
+const APP_VERSION_FALLBACK = "0.11.2";
 // "4m 07s" - how long a setup has been running, for the one place a long wait
 // needs to be explained rather than look frozen.
 function formatElapsed(ms) {
@@ -196,6 +196,12 @@ export default function ContainerManager() {
   const [companionCopied, setCompanionCopied] = useState(false);
   const [companionWebBusy, setCompanionWebBusy] = useState(false);
   const [companionWebError, setCompanionWebError] = useState('');
+  // Remote access through a relay: an address the PC dials out to, so the phone needs no
+  // port and no local network. The address is asked for because the hosted relay is not
+  // published yet; a self-hosted one works the same way.
+  const [relayAddress, setRelayAddress] = useState("");
+  const [relayBusy, setRelayBusy] = useState(false);
+  const [relayError, setRelayError] = useState('');
   // Ticks only while something is being set up, so a long setup is visibly still
   // working instead of looking like an app that never appears. It is declared here,
   // in the component that renders the app list and the setup line, because that is
@@ -281,6 +287,37 @@ export default function ContainerManager() {
       if (status) setCompanion(status);
     } catch (error) { /* see toggleCompanion */ } finally {
       setCompanionBusy(false);
+    }
+  }
+
+  async function changeCompanionRelay(enable) {
+    if (relayBusy) return;
+    setRelayBusy(true);
+    setRelayError('');
+    try {
+      const status = enable
+        ? await enableCompanionRelay(relayAddress || companion?.relay?.address || "")
+        : await disableCompanionRelay();
+      if (status) setCompanion(status);
+      if (status?.error) setRelayError(status.error);
+    } catch (error) {
+      setRelayError(error?.message || 'Remote access could not be changed.');
+    } finally {
+      setRelayBusy(false);
+    }
+  }
+
+  async function refreshRelayCode() {
+    if (relayBusy) return;
+    setRelayBusy(true);
+    try {
+      const status = await newCompanionRelayCode();
+      if (status) setCompanion(status);
+      if (status?.error) setRelayError(status.error);
+    } catch (error) {
+      setRelayError(error?.message || "A new code could not be asked for.");
+    } finally {
+      setRelayBusy(false);
     }
   }
 
@@ -1659,6 +1696,57 @@ export default function ContainerManager() {
                       </span>
                     )}
                     {companionWebError && <span className="companion-web-error">{companionWebError}</span>}
+                  </div>
+                  <div className={`companion-web ${companion.relay?.enabled ? "companion-web-on" : ""}`}>
+                    <div className="companion-web-head">
+                      <strong>Remote access</strong>
+                      <span className="companion-pill">
+                        {companion.relay?.connected ? "Connected" : companion.relay?.enabled ? "On" : "Off"}
+                      </span>
+                    </div>
+                    <span className="muted">
+                      Gives the phone a RunContainer address instead of one on this PC, so no port and no home
+                      network is needed. This PC dials out to a relay, and the phone pairs with the code below.
+                      The hosted relay is not published yet; a relay you run yourself works here too.
+                    </span>
+                    <input
+                      type="url"
+                      value={relayAddress || companion.relay?.address || ""}
+                      onChange={(event) => setRelayAddress(event.target.value)}
+                      placeholder="https://relay.example"
+                      aria-label="Relay address"
+                      autoComplete="off"
+                      spellCheck="false"
+                    />
+                    <div className="detail-actions">
+                      <button
+                        className="settings-button"
+                        type="button"
+                        disabled={relayBusy}
+                        onClick={() => changeCompanionRelay(true)}
+                      >
+                        {relayBusy ? "Working…" : companion.relay?.enabled ? "Use this address" : "Turn on remote access"}
+                      </button>
+                      {companion.relay?.enabled && (
+                        <>
+                          <button className="settings-button ghost" type="button" disabled={relayBusy} onClick={refreshRelayCode}>
+                            New code
+                          </button>
+                          <button className="settings-button ghost" type="button" disabled={relayBusy} onClick={() => changeCompanionRelay(false)}>
+                            Turn off
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    {companion.relay?.code && (
+                      <div className="companion-pair">
+                        <span className="companion-code-label">Remote access code</span>
+                        <span className="companion-code">{formatCompanionCode(companion.relay.code) || companion.relay.code}</span>
+                      </div>
+                    )}
+                    {(relayError || companion.relay?.error) && (
+                      <span className="companion-web-error">{relayError || companion.relay?.error}</span>
+                    )}
                   </div>
                   <div className="companion-pair">
                     <span className="companion-code-label">Pairing code</span>

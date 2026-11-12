@@ -1,7 +1,7 @@
 {
   "name": "RunContainer",
   "productName": "RunContainer",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "description": "A Windows-based container management application for running applications in a sandboxed environment.",
   "main": "public/main.js",
   "scripts": {
@@ -19,7 +19,7 @@
     "premake": "npm run build",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "relay:test": "node --test relay/test/pairing.test.js relay/test/routes.test.js relay/test/d1.sqlite.test.js"
+    "relay:test": "node --test relay/test/pairing.test.js relay/test/routes.test.js relay/test/d1.sqlite.test.js relay/test/connection.test.js"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",

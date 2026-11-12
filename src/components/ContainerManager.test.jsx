@@ -92,6 +92,7 @@ jest.mock("../services/containerService", () => ({
     devices: [],
     connected: 0,
     web: { installed: true, signedIn: true, enabled: false, url: '', error: '' },
+    relay: { enabled: false, address: '', code: null, codeExpiresAt: 0, connected: false, error: '' },
   })),
   enableCompanion: jest.fn(async () => ({ running: true, port: 7878, urls: [{ url: 'http://192.168.1.10:7878/', interface: 'Wi-Fi' }], code: '123456', devices: [], web: { installed: true, signedIn: true, enabled: false, url: '', error: '' } })),
   enableCompanionWeb: jest.fn(async () => ({ running: true, web: { installed: true, signedIn: true, enabled: true, url: 'https://study-pc.tail1a2b.ts.net/', error: '' } })),
@@ -100,6 +101,21 @@ jest.mock("../services/containerService", () => ({
   newCompanionCode: jest.fn(async () => ({ running: true, code: '654321', urls: [], devices: [] })),
   forgetCompanionDevices: jest.fn(async () => ({ running: true, devices: [] })),
   onCompanionStatus: jest.fn(() => () => {}),
+  enableCompanionRelay: jest.fn(async (address) => ({
+    running: true, port: 7878, code: '123456', devices: [], connected: 0,
+    web: { installed: true, signedIn: true, enabled: false, url: '', error: '' },
+    relay: { enabled: true, address, code: '111222', codeExpiresAt: 0, connected: true, error: '' },
+  })),
+  disableCompanionRelay: jest.fn(async () => ({
+    running: true, port: 7878, code: '123456', devices: [], connected: 0,
+    web: { installed: true, signedIn: true, enabled: false, url: '', error: '' },
+    relay: { enabled: false, address: '', code: null, codeExpiresAt: 0, connected: false, error: '' },
+  })),
+  newCompanionRelayCode: jest.fn(async () => ({
+    running: true, port: 7878, code: '123456', devices: [], connected: 0,
+    web: { installed: true, signedIn: true, enabled: false, url: '', error: '' },
+    relay: { enabled: true, address: 'https://relay.example', code: '333444', codeExpiresAt: 0, connected: false, error: '' },
+  })),
   // Virtual machines (developer mode).
   listVms: jest.fn(async () => ({ vms: [] })),
   browseVmIso: jest.fn(async () => ({ path: null })),

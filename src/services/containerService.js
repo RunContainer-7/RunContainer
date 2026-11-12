@@ -127,6 +127,21 @@ export async function disableCompanionWeb() {
   return requireIpc('The iPhone companion').invoke('companion-disable-web');
 }
 
+// Remote access through a relay: the PC dials out, so the phone needs no port. The
+// address is passed in because the hosted relay is not published yet; a self-hosted one
+// works the same way.
+export async function enableCompanionRelay(address) {
+  return requireIpc('Remote access').invoke('companion-relay-enable', address);
+}
+
+export async function disableCompanionRelay() {
+  return requireIpc('Remote access').invoke('companion-relay-disable');
+}
+
+export async function newCompanionRelayCode() {
+  return requireIpc('Remote access').invoke('companion-relay-code');
+}
+
 export function onCompanionStatus(handler) {
   if (!ipcRenderer) return () => {};
   const listener = (_event, status) => handler(status);
