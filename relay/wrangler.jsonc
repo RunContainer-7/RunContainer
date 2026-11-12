@@ -1,0 +1,16 @@
+// Local development only. The deployed Worker is published through Freebuff Sites, which
+// injects its own bindings; this file exists so `npm run dev` in relay/ can run the Worker
+// against a local D1 database with the same schema.
+{
+  "name": "runcontainer-relay",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "runcontainer-relay-dev",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "."
+    }
+  ]
+}

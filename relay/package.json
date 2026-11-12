@@ -1,0 +1,12 @@
+{
+  "name": "runcontainer-relay",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Hosted relay for the RunContainer iPhone companion: pairs a phone with a PC so neither needs a port.",
+  "scripts": {
+    "test": "node --test test/",
+    "dev": "wrangler dev",
+    "deploy": "echo 'Deployment goes through Freebuff Sites, not wrangler.' && exit 1"
+  }
+}
