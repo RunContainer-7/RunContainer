@@ -1697,57 +1697,7 @@ export default function ContainerManager() {
                     )}
                     {companionWebError && <span className="companion-web-error">{companionWebError}</span>}
                   </div>
-                  <div className={`companion-web ${companion.relay?.enabled ? "companion-web-on" : ""}`}>
-                    <div className="companion-web-head">
-                      <strong>Remote access</strong>
-                      <span className="companion-pill">
-                        {companion.relay?.connected ? "Connected" : companion.relay?.enabled ? "On" : "Off"}
-                      </span>
-                    </div>
-                    <span className="muted">
-                      Gives the phone a RunContainer address instead of one on this PC, so no port and no home
-                      network is needed. This PC dials out to a relay, and the phone pairs with the code below.
-                      The hosted relay is not published yet; a relay you run yourself works here too.
-                    </span>
-                    <input
-                      type="url"
-                      value={relayAddress || companion.relay?.address || ""}
-                      onChange={(event) => setRelayAddress(event.target.value)}
-                      placeholder="https://relay.example"
-                      aria-label="Relay address"
-                      autoComplete="off"
-                      spellCheck="false"
-                    />
-                    <div className="detail-actions">
-                      <button
-                        className="settings-button"
-                        type="button"
-                        disabled={relayBusy}
-                        onClick={() => changeCompanionRelay(true)}
-                      >
-                        {relayBusy ? "Working…" : companion.relay?.enabled ? "Use this address" : "Turn on remote access"}
-                      </button>
-                      {companion.relay?.enabled && (
-                        <>
-                          <button className="settings-button ghost" type="button" disabled={relayBusy} onClick={refreshRelayCode}>
-                            New code
-                          </button>
-                          <button className="settings-button ghost" type="button" disabled={relayBusy} onClick={() => changeCompanionRelay(false)}>
-                            Turn off
-                          </button>
-                        </>
-                      )}
-                    </div>
-                    {companion.relay?.code && (
-                      <div className="companion-pair">
-                        <span className="companion-code-label">Remote access code</span>
-                        <span className="companion-code">{formatCompanionCode(companion.relay.code) || companion.relay.code}</span>
-                      </div>
-                    )}
-                    {(relayError || companion.relay?.error) && (
-                      <span className="companion-web-error">{relayError || companion.relay?.error}</span>
-                    )}
-                  </div>
+                  {/* Remote access stays out of the shipped Settings until the hosted relay is published. */}
                   <div className="companion-pair">
                     <span className="companion-code-label">Pairing code</span>
                     <span className="companion-code">{formatCompanionCode(companion.code) || 'Ask for a new code'}</span>

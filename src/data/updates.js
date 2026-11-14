@@ -4,6 +4,17 @@
 
 export const UPDATES = [
   {
+    version: '0.11.2',
+    date: '2026-11-08',
+    title: 'Remote access for the iPhone companion, tested end to end',
+    changes: [
+      'Remote access dials out from this PC to a relay, so the phone can open a fixed https address with no port and no home network. It registers this PC once, shows a six-digit pairing code, mints room tickets for the phone and this PC, and reconnects with bounded, jittered backoff when the link drops.',
+      'A relay that no longer recognises this PC stops instead of hammering it, and remote access is restored when the companion is turned back on. The pairing code can be refreshed on demand.',
+      'The relay lifecycle (start, stop, restore and the unauthorised path) now lives in its own module with its own tests, so the wiring is checked rather than only assembled.',
+      'The Settings card for remote access stays out of the shipped app until the hosted relay is published; the wiring behind it is kept.',
+    ],
+  },
+  {
     version: '0.11.1',
     date: '2026-11-07',
     title: 'The companion opens when the PC is away',
