@@ -3,7 +3,7 @@ import path from "path";
 import React from "react";
 import ReactDOM from "react-dom";
 import { act } from "react-dom/test-utils";
-import ContainerManager from "./ContainerManager";
+import ContainerManager, { companionLinkUrl } from "./ContainerManager";
 import AppErrorBoundary from "./AppErrorBoundary";
 import { runContainer, onContainerStatus, getAppVersion, checkAppUpdates, downloadUpdate, listContainers, repairAppEnvironment, onAiDiagnosis, setAiMonitoring, getAiStatus, getPreferences, setPreference, runContainerWithJit, setAppConfig, listVms } from "../services/containerService";
 
@@ -221,6 +221,13 @@ describe("ContainerManager", () => {
     act(() => {
       ReactDOM.unmountComponentAtNode(container);
     });
+  });
+
+  it("points the phone at the hosted companion when a web address is on", () => {
+    const hosted = companionLinkUrl({ web: { enabled: true, url: 'https://study-pc.tail1a2b.ts.net/' } });
+    expect(hosted).toBe('https://runcontainer-companion-x7z9m3.freebuff.page/?pc=https%3A%2F%2Fstudy-pc.tail1a2b.ts.net%2F');
+    // A local address is still used without one: a hosted https page cannot reach it.
+    expect(companionLinkUrl({ urls: [{ url: 'http://192.168.1.10:7878/' }], port: 7878 })).toBe('http://192.168.1.10:7878/');
   });
 
   it("shows where app files live, with nothing to configure in Settings", () => {

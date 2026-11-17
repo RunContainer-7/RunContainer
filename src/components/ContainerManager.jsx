@@ -8,11 +8,15 @@ import CompanionQr from "./CompanionQr";
 import VirtualiseTab from "./VirtualiseTab";
 import { UPDATES } from "../data/updates";
 
-// The address to put in front of a phone. A Tailscale address only works once the
-// phone is on the same private network, so a plain local address is preferred for the
-// QR code; the private one stays available in the list for when it is needed.
-function companionLinkUrl(companion) {
-  if (companion?.web?.enabled && companion.web.url) return companion.web.url;
+// The hosted companion is the fixed address to put in front of a phone. It reaches the
+// PC through the site's own gateway, using the PC's https web address as the target.
+// A local address is still used when there is no web address, because a hosted https
+// page cannot open a local http one.
+const COMPANION_SITE_URL = 'https://runcontainer-companion-x7z9m3.freebuff.page/';
+export function companionLinkUrl(companion) {
+  if (companion?.web?.enabled && companion.web.url) {
+    return `${COMPANION_SITE_URL}?pc=${encodeURIComponent(companion.web.url)}`;
+  }
   const urls = companion?.urls || [];
   const local = urls.find((entry) => !/^http:\/\/100\./.test(entry.url));
   return (local || urls[0])?.url || (companion?.port ? `http://localhost:${companion.port}/` : "");
