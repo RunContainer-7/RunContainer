@@ -209,8 +209,11 @@
       return;
     }
     if (HOSTED) {
-      let base = normalisePcAddress(pcAddress?.value) || state.base;
+      // A freshly typed code wins over a remembered address: the PC's ts.net name can
+      // change between pairings, and the stored one would then point at nothing.
+      let base = normalisePcAddress(pcAddress?.value);
       if (!base) base = await lookupPcAddress(code);
+      if (!base) base = state.base;
       if (!base) {
         message('That code is not active. On the PC, open Settings → iPhone companion and type the code showing there.');
         pairCode.focus();

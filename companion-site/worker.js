@@ -56,18 +56,25 @@ function upstreamHeaders(request) {
   return headers;
 }
 
+function corsHeaders(extra) {
+  return Object.assign({
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET, POST, OPTIONS',
+    'access-control-allow-headers': 'content-type',
+    'cache-control': 'no-store',
+  }, extra || {});
+}
+
 function json(body, status, extra) {
   return new Response(JSON.stringify(body), {
     status: status || 200,
     headers: Object.assign({
       'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'no-store',
+      'content-type': 'application/json; charset=utf-8',
       // The PC's Settings window posts here from the app's own origin, which may be a
       // local dev server or a file origin. The endpoint holds no session and returns
       // nothing about anyone else, so a wildcard origin is the honest header.
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'GET, POST, OPTIONS',
-      'access-control-allow-headers': 'content-type',
+      ...corsHeaders(),
     }, extra || {}),
   });
 }
@@ -132,7 +139,8 @@ async function lookupCode(request, env) {
 }
 
 async function handleConnectCode(request, env, allowLocal) {
-  if (request.method === 'OPTIONS') return json({}, 204);
+  // A 204 cannot carry a body; building one with a body throws and becomes a 502.
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders() });
   if (request.method === 'POST') return registerCode(request, env, allowLocal);
   if (request.method === 'GET') return lookupCode(request, env);
   return json({ error: 'Use GET or POST.' }, 405);
