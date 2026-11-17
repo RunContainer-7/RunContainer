@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { installContainer, importFromUrl, runContainer, killContainer, resetContainer, duplicateContainer, exportContainer, getAppLogs, onContainerStatus, cancelDeleteContainer, setIsolationEngine, setWindowHosting, getAppVersion, getHyperVStatus, setAppConfig, setAppProfile, resetEnvironment, openGuestDisplay, checkAppUpdates, openUpdateLink, snoozeUpdate, downloadUpdate, cancelUpdateDownload, getUpdateState, installDownloadedUpdate, onUpdateDownloadProgress, getQemuStatus, detectQemu, getPerformance, openExternalUrl, repairAppEnvironment, getAiStatus, getAiHistory, getAiExperiences, promoteAiExperiences, rollbackAiModel, setAiMonitoring, onAiDiagnosis, onAiRepairResult, onAiRecovered, onAiUnavailable, onAiStatus, onAiHistory, onAiVerified, onSetupProgress, onSetupComplete, runContainerWithJit, getPreferences, setPreference, getCompanionStatus, enableCompanion, disableCompanion, newCompanionCode, forgetCompanionDevices, enableCompanionWeb, disableCompanionWeb, enableCompanionRelay, disableCompanionRelay, newCompanionRelayCode, onCompanionStatus } from "../services/containerService";
 import useContainers from "../hooks/useContainers";
 import BeginnerSetup from "./BeginnerSetup";
@@ -7,12 +7,12 @@ import { STORE_SUBMISSION_URL } from "../data/exeStore";
 import CompanionQr from "./CompanionQr";
 import VirtualiseTab from "./VirtualiseTab";
 import { UPDATES } from "../data/updates";
+import { COMPANION_SITE_URL, connectCodePayload, registerCompanionConnectCode } from "../services/companionConnectCode";
 
 // The hosted companion is the fixed address to put in front of a phone. It reaches the
 // PC through the site's own gateway, using the PC's https web address as the target.
 // A local address is still used when there is no web address, because a hosted https
 // page cannot open a local http one.
-const COMPANION_SITE_URL = 'https://runcontainer-companion-x7z9m3.freebuff.page/';
 export function companionLinkUrl(companion) {
   if (companion?.web?.enabled && companion.web.url) {
     return `${COMPANION_SITE_URL}?pc=${encodeURIComponent(companion.web.url)}`;
@@ -50,7 +50,7 @@ function useBootAnimation() {
 // Used only until the main process reports the version from package.json.
 // Shown only for the moment before the main process reports the real version; the
 // test asserts that it tracks package.json, so it must be bumped with the release.
-const APP_VERSION_FALLBACK = "0.11.2";
+const APP_VERSION_FALLBACK = "0.11.3";
 // "4m 07s" - how long a setup has been running, for the one place a long wait
 // needs to be explained rather than look frozen.
 function formatElapsed(ms) {
@@ -258,6 +258,18 @@ export default function ContainerManager() {
       ? onCompanionStatus((status) => { if (status) setCompanion(status); })
       : undefined;
   }, [activeTab]);
+
+  // The hosted page resolves a six-digit code to this PC, so the phone only types the code
+  // that is already on this card. One request when the panel reads the status; nothing at
+  // all when the web address is off, because there is no address to publish.
+  const registeredCode = useRef('');
+  useEffect(() => {
+    if (!connectCodePayload(companion)) return;
+    const key = `${companion.code}|${companion.web.url}`;
+    if (registeredCode.current === key) return;
+    registeredCode.current = key;
+    registerCompanionConnectCode(companion).catch(() => {});
+  }, [companion]);
 
   async function toggleCompanion() {
     if (companionBusy) return;
@@ -1707,7 +1719,9 @@ export default function ContainerManager() {
                     <span className="companion-code">{formatCompanionCode(companion.code) || 'Ask for a new code'}</span>
                   </div>
                   <span className="muted">
-                    The code works once and expires after five minutes.
+                    {companion.web?.enabled
+                      ? `Type this on the phone: it finds this PC at ${COMPANION_SITE_URL.replace(/^https?:\/\//, '').replace(/\/$/, '')} and pairs in one step. It works once and expires after five minutes.`
+                      : 'The code works once and expires after five minutes.'}
                     {companion.connected > 0 ? ` ${companion.connected} phone${companion.connected === 1 ? '' : 's'} connected now.` : ''}
                   </span>
                   {companion.urls?.length > 0 && (

@@ -4,6 +4,17 @@
 
 export const UPDATES = [
   {
+    version: '0.11.3',
+    date: '2026-11-17',
+    title: 'One code connects the phone to the hosted companion',
+    changes: [
+      'The iPhone companion now has a real home on the web: runcontainer-companion-x7z9m3.freebuff.page. Add it to the Home Screen once and it opens like an app, and the page is kept on the phone so it still opens when the PC is away.',
+      'Pairing no longer starts with typing an address on the phone. The PC publishes the six-digit code it is already showing, the site resolves that code to this PC, and the phone goes from code to connected in one step. It still works once and expires after five minutes.',
+      'The hosted page reaches this PC through the site’s own gateway, which only forwards to https://…ts.net addresses. The PC keeps its Tailscale address and the phone never types it. A PC without a web address keeps serving its own page on the local network, as before.',
+      'If the code has expired, or the site has not seen this PC yet, the pairing screen says so, and the web-address field stays one tap away under Use the PC’s web address instead.',
+    ],
+  },
+  {
     version: '0.11.2',
     date: '2026-11-08',
     title: 'Remote access for the iPhone companion, tested end to end',

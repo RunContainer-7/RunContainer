@@ -31,6 +31,7 @@
   const pcField = document.getElementById('pc-field');
   const pcAddress = document.getElementById('pc-address');
   const pcHint = document.getElementById('pc-hint');
+  const pcAdvanced = document.getElementById('pc-advanced');
   const connection = document.getElementById('connection');
   const appList = document.getElementById('app-list');
   const appsHint = document.getElementById('apps-hint');
@@ -187,22 +188,36 @@
 
   // ------------------------------------------------------------------ pairing ---
 
+  // The code the PC shows does two jobs on the hosted copy: it is how the phone finds this
+  // PC's address at the site, and how the PC authorises the phone. One field, one step.
+  async function lookupPcAddress(code) {
+    try {
+      const response = await fetch(`/api/connect-code?code=${encodeURIComponent(code)}`, { cache: 'no-store' });
+      if (!response.ok) return '';
+      const body = await response.json();
+      return normalisePcAddress(body?.target);
+    } catch (error) {
+      return '';
+    }
+  }
+
   async function pair() {
+    const code = pairCode.value.replace(/\D/g, '').slice(0, 6);
+    if (code.length !== 6) {
+      message('Enter the six-digit code shown on the PC.');
+      pairCode.focus();
+      return;
+    }
     if (HOSTED) {
-      const base = normalisePcAddress(pcAddress.value);
+      let base = normalisePcAddress(pcAddress?.value) || state.base;
+      if (!base) base = await lookupPcAddress(code);
       if (!base) {
-        message('Enter the https://…ts.net address shown on the PC.');
-        pcAddress.focus();
+        message('That code is not active. On the PC, open Settings → iPhone companion and type the code showing there.');
+        pairCode.focus();
         return;
       }
       state.base = base;
       try { localStorage.setItem(PC_KEY, base); } catch (error) { /* private mode */ }
-    }
-    const code = pairCode.value.replace(/\D/g, '').slice(0, 6);
-    if (code.length !== 6) {
-      message('Enter the six digits shown on the PC.');
-      pairCode.focus();
-      return;
     }
     pairButton.disabled = true;
     message('');
@@ -223,7 +238,9 @@
       applyChannel(result.body.channel);
       await open();
     } catch (error) {
-      message('Could not reach the PC. Check that both devices are on the same network, then try again.');
+      message(HOSTED
+        ? 'Could not reach the PC. Check that it is on and that Tailscale is connected on both devices, then try again.'
+        : 'Could not reach the PC. Check that both devices are on the same network, then try again.');
     } finally {
       pairButton.disabled = false;
     }
@@ -684,7 +701,11 @@
   if (HOSTED) {
     if (pcField) pcField.hidden = false;
     if (pcHint) pcHint.hidden = false;
-    const fromQuery = new URLSearchParams(location.search).get('pc');
+    if (pcAdvanced) pcAdvanced.hidden = false;
+    const params = new URLSearchParams(location.search);
+    const fromQuery = params.get('pc');
+    const queryCode = (params.get('code') || '').replace(/\D/g, '').slice(0, 6);
+    if (queryCode && pairCode) pairCode.value = queryCode;
     let stored = '';
     try { stored = localStorage.getItem(PC_KEY) || ''; } catch (error) { /* private mode */ }
     state.base = normalisePcAddress(fromQuery || stored);
