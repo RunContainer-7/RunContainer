@@ -712,3 +712,5 @@ a { color: inherit; }
   html { scroll-behavior: auto; }
   * { animation: none !important; transition: none !important; }
 }
+
+.fine a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--line-strong); }
