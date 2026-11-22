@@ -461,3 +461,7 @@ body.offline .app-card:disabled { opacity: 0.72; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* The screens are switched with the hidden attribute. Their own display rules would
+   otherwise keep every screen — and the keys row — laid out at once. */
+.screen[hidden], .keys[hidden] { display: none; }

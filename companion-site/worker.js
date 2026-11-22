@@ -70,7 +70,6 @@ function json(body, status, extra) {
     status: status || 200,
     headers: Object.assign({
       'content-type': 'application/json; charset=utf-8',
-      'content-type': 'application/json; charset=utf-8',
       // The PC's Settings window posts here from the app's own origin, which may be a
       // local dev server or a file origin. The endpoint holds no session and returns
       // nothing about anyone else, so a wildcard origin is the honest header.
@@ -211,6 +210,12 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const allowLocal = isLoopback(url.hostname);
+    // The installed icon opens /app/; a typed or shared /app goes there too, instead of
+    // depending on the asset server's own trailing-slash redirect.
+    if (url.pathname === '/app') {
+      url.pathname = '/app/';
+      return Response.redirect(url.toString(), 308);
+    }
     if (url.pathname === CONNECT_PATH) return handleConnectCode(request, env, allowLocal);
     if (url.pathname !== PC_PATH) {
       return env.ASSETS.fetch(request);

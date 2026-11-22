@@ -461,3 +461,10 @@ body.offline .app-card:disabled { opacity: 0.72; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* The hosted interface links back to the page that explains it. */
+.fineprint a { color: var(--accent-text); text-decoration: none; border-bottom: 1px solid var(--line-strong); }
+
+/* The screens are switched with the hidden attribute. Their own display rules would
+   otherwise keep every screen — and the keys row — laid out at once. */
+.screen[hidden], .keys[hidden] { display: none; }

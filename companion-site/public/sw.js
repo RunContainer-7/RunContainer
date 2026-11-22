@@ -2,19 +2,22 @@
 //
 // iOS opens a Home Screen icon to the address it was installed from, and when that address
 // does not answer it shows its own error page — the page never gets a chance to say "the PC
-// is off". This worker keeps the shell and answers from the cache when the PC is
-// unreachable, so the companion opens with its last known list instead of Safari's
+// is off". This worker keeps the two pages of the site and answers from the cache when the
+// site is unreachable, so the companion opens with its last known list instead of Safari's
 // "the server cannot be found".
 //
 // It only works on a secure address. A LAN address such as http://192.168.1.20:7878/ is not
 // a secure origin, so iOS refuses to install a worker for it at all — which is why the
 // https address (Settings → iPhone companion → Web address) is the one to add.
 
-const CACHE = 'rc-companion-hosted-v1';
+const CACHE = 'rc-companion-hosted-v2';
 const SHELL = [
   '/',
-  '/companion.css?v=2',
-  '/companion.js?v=2',
+  '/app/',
+  '/site.css?v=1',
+  '/site.js?v=1',
+  '/companion.css?v=4',
+  '/companion.js?v=3',
   '/manifest.webmanifest',
   '/manifest-nightly.webmanifest',
   '/icons/icon-180.png?v=2',
@@ -56,25 +59,33 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(cacheFirst(request));
 });
 
+// The site has two pages, and each has to fall back to its own copy. The old worker kept
+// every navigation under '/', so opening the installed app could answer with the landing
+// page instead of the interface.
+function shellKey(pathname) {
+  return pathname === '/app' || pathname.startsWith('/app/') ? '/app/' : '/';
+}
+
 async function networkFirstShell(request) {
   const cache = await caches.open(CACHE);
+  const key = shellKey(new URL(request.url).pathname);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), SHELL_TIMEOUT_MS);
   try {
     const response = await fetch(request, { signal: controller.signal });
     if (response && response.ok) {
-      cache.put('/', response.clone()).catch(() => {});
+      cache.put(key, response.clone()).catch(() => {});
       return response;
     }
     throw new Error(`HTTP ${response && response.status}`);
   } catch (error) {
-    const cached = await cache.match('/');
+    const cached = (await cache.match(key)) || (await cache.match('/'));
     if (cached) return cached;
     return new Response(
       '<!DOCTYPE html><meta name="viewport" content="width=device-width, initial-scale=1">' +
       '<body style="background:#0b0f14;color:#c9d1dc;font:16px system-ui;padding:32px">' +
-      '<h1 style="font-size:20px">RunContainer can\u2019t reach your PC</h1>' +
-      '<p>Open RunContainer on the PC, then open this again.</p>',
+      '<h1 style="font-size:20px">RunContainer Companion is offline</h1>' +
+      '<p>Check the connection, then open this again.</p>',
       { status: 503, headers: { 'content-type': 'text/html; charset=utf-8' } },
     );
   } finally {

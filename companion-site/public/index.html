@@ -2,141 +2,235 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <meta name="theme-color" content="#0b0f14">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080b10">
   <meta name="color-scheme" content="dark light">
-  <!-- Add to Home Screen: Safari opens this in its own window, without the browser
-       chrome, which is what makes it feel like an app rather than a bookmarked page. -->
+  <meta name="description" content="RunContainer Companion shows the apps running in RunContainer on your Windows PC on your phone. Add it to your home screen, enter the code from the PC, and your apps are there.">
+  <!-- Installing from this page still needs the home-screen identity the companion uses. -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="RunContainer">
-  <!-- This copy is the hosted companion. It reaches the PC through the site's own
-       /pc gateway, so the first thing it needs is the PC's https web address. -->
-  <meta name="rc-companion-hosted" content="true">
-  <link id="app-manifest" rel="manifest" href="/manifest.webmanifest">
+  <link rel="manifest" href="/manifest.webmanifest">
   <!-- The ?v= suffix matters: iOS reuses an installed home-screen icon until its URL
-       changes, so the old green icon would otherwise stay on the phone forever. -->
-  <link id="app-icon" rel="apple-touch-icon" href="/icons/icon-180.png?v=2">
-  <link id="app-favicon" rel="icon" href="/icons/icon-192.png?v=2" sizes="192x192">
-  <link rel="stylesheet" href="/companion.css?v=2">
-  <title>RunContainer — Companion</title>
+       changes, so a new icon would otherwise never replace the old one. -->
+  <link rel="apple-touch-icon" href="/icons/icon-180.png?v=2">
+  <link rel="icon" href="/icons/icon-192.png?v=2" sizes="192x192">
+  <link rel="stylesheet" href="/site.css?v=1">
+  <title>RunContainer Companion — your PC apps, on your phone</title>
 </head>
 <body>
-  <div class="halo" aria-hidden="true"></div>
+  <div class="glow" aria-hidden="true"></div>
 
-  <main id="screen-pair" class="screen" hidden>
-    <section class="card pair-card">
-      <img id="app-mark" class="mark" src="/icons/icon-192.png?v=2" alt="" width="64" height="64">
-      <h1>Connect to your PC</h1>
-      <p class="lede">
-        This is the RunContainer companion. It shows an app that is running on your Windows PC
-        and lets you use it from this phone. Nothing is installed or run on the phone itself.
-      </p>
-      <ol class="steps">
-        <li>On the PC, open <strong>RunContainer → Settings → iPhone companion</strong> and turn it on.</li>
-        <li>Type the <strong>six-digit code</strong> that card is showing.</li>
-        <li>Tap <strong>Connect</strong>. The phone is remembered, so this happens once.</li>
-      </ol>
-      <label class="field">
-        <span>Code from the PC</span>
-        <input id="pair-code" inputmode="numeric" autocomplete="one-time-code"
-               pattern="[0-9]*" maxlength="6" placeholder="000000" enterkeyhint="done">
-      </label>
-      <label class="field">
-        <span>Name this phone</span>
-        <input id="pair-device" maxlength="40" placeholder="My iPhone" autocomplete="off">
-      </label>
-      <button id="pair-button" class="primary" type="button">Connect</button>
-      <p id="pair-error" class="error" role="alert" hidden></p>
-      <p class="fineprint">
-        The code works once and expires after five minutes. If it runs out, ask for a new one on the PC.
-      </p>
-      <details id="pc-advanced" class="fineprint" hidden>
-        <summary>Use the PC's web address instead</summary>
-        <label class="field" id="pc-field" hidden>
-          <span>PC web address</span>
-          <input id="pc-address" type="url" inputmode="url" placeholder="https://your-pc.tailnet.ts.net"
-                 autocomplete="off" autocapitalize="none" spellcheck="false">
-        </label>
-        <p class="fineprint" id="pc-hint" hidden>
-          The address must start with <code>https://</code> and end in <code>.ts.net</code>. A local
-          <code>192.168.…</code> address cannot be reached from a website, because the browser blocks it.
-          This is only needed on a PC older than 0.11.3, which cannot hand out a code yet.
+  <header class="top">
+    <div class="wrap top-inner">
+      <a class="brand" href="/">
+        <img src="/icons/icon-192.png?v=2" alt="" width="34" height="34">
+        <span class="brand-text">RunContainer<span>Companion</span></span>
+      </a>
+      <nav class="nav" aria-label="Sections">
+        <a href="#how">How it works</a>
+        <a href="#install">Install</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <a id="top-open" class="btn small ghost" href="/app/">Open the app</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="spark" aria-hidden="true"></span> For RunContainer on Windows</p>
+        <h1>Your PC apps,<br>on your phone.</h1>
+        <p class="lede">
+          RunContainer Companion is the pocket-sized window to the apps running in RunContainer
+          on your Windows PC. Add it to your home screen, type the six-digit code the PC shows,
+          and every app that is running is right there — full screen, with touch and keyboard.
         </p>
-      </details>
+        <div class="actions">
+          <button id="install-button" class="btn primary" type="button">Add to Home Screen</button>
+          <a id="hero-open" class="btn ghost" href="/app/">Open the companion</a>
+        </div>
+        <p class="note" id="install-note">Free. Nothing is installed on the phone — the apps keep running on the PC.</p>
+      </div>
+
+      <div class="device-wrap" aria-hidden="true">
+        <div class="device">
+          <div class="device-screen">
+            <div class="device-bar">
+              <span class="device-title">RunContainer</span>
+              <span class="device-pill">Connected</span>
+            </div>
+            <p class="device-label">Apps on this PC</p>
+            <div class="device-app">
+              <span class="device-glyph">F</span>
+              <span class="device-meta"><strong>Firefox</strong><small>Running — tap to open</small></span>
+              <span class="device-chev">›</span>
+            </div>
+            <div class="device-app">
+              <span class="device-glyph">S</span>
+              <span class="device-meta"><strong>Spotify</strong><small>Running — tap to open</small></span>
+              <span class="device-chev">›</span>
+            </div>
+            <div class="device-app">
+              <span class="device-glyph">N</span>
+              <span class="device-meta"><strong>Notepad</strong><small>Running — tap to open</small></span>
+              <span class="device-chev">›</span>
+            </div>
+            <p class="device-hint">Start an app on the PC and it appears here.</p>
+          </div>
+        </div>
+      </div>
     </section>
-  </main>
 
-
-  <main id="screen-apps" class="screen" hidden>
-    <header class="bar">
-      <div class="bar-title">
-        <strong>RunContainer</strong>
-        <span id="connection" class="pill">Connecting…</span>
-      </div>
-      <button class="ghost icon theme-toggle" type="button" aria-label="Switch between the light and dark interface">☾</button>
-      <button id="refresh" class="ghost small" type="button" aria-label="Refresh">Refresh</button>
-    </header>
-    <section class="body">
-      <h2>Apps on this PC</h2>
-      <p class="hint" id="apps-hint">Apps that are running can be opened here.</p>
-      <ul id="app-list" class="app-list"></ul>
-      <div class="tip">
-        <strong>Tip</strong>
-        <span>Start an app on the PC first, then it appears here. Your phone never runs Windows applications itself.</span>
-      </div>
-    </section>
-  </main>
-
-  <main id="screen-view" class="screen viewer" hidden>
-    <header class="bar">
-      <button id="back" class="ghost icon" type="button" aria-label="Back to apps">←</button>
-      <div class="bar-title">
-        <strong id="view-name">App</strong>
-        <span id="view-state" class="pill">Waiting for a picture</span>
-      </div>
-      <button id="quality" class="ghost small" type="button" aria-label="Picture quality">Auto</button>
-      <button class="ghost icon theme-toggle" type="button" aria-label="Switch between the light and dark interface">☾</button>
-    </header>
-
-    <div id="stage" class="stage">
-      <canvas id="screen" aria-label="Live view of the app on your PC"></canvas>
-      <div id="stage-note" class="stage-note">Waiting for the PC to send the first frame…</div>
-    </div>
-
-    <div id="keys" class="keys" hidden>
-      <button data-key="Escape" type="button">Esc</button>
-      <button data-key="Tab" type="button">Tab</button>
-      <button data-key="Backspace" type="button">⌫</button>
-      <button data-key="Enter" type="button">⏎</button>
-      <button data-key="ArrowLeft" type="button">←</button>
-      <button data-key="ArrowUp" type="button">↑</button>
-      <button data-key="ArrowDown" type="button">↓</button>
-      <button data-key="ArrowRight" type="button">→</button>
-    </div>
-
-    <form id="type-form" class="composer">
-      <button id="keyboard" class="ghost icon" type="submit" aria-label="Send">↵</button>
-      <input id="type-field" placeholder="Type to the app…" autocomplete="off" autocorrect="off"
-             autocapitalize="off" spellcheck="false" enterkeyhint="send">
-      <button id="more-keys" class="ghost icon" type="button" aria-label="More keys">⌨</button>
-    </form>
-  </main>
-
-  <div id="install-tip" class="install-tip" role="dialog" aria-labelledby="install-title" hidden>
-    <div class="install-card">
-      <strong id="install-title">Open it like an app</strong>
-      <ol id="install-steps" class="steps">
-        <li>Tap the <strong>Share</strong> button at the bottom of Safari.</li>
-        <li>Choose <strong>Add to Home Screen</strong>.</li>
-        <li>Open RunContainer from your home screen from then on.</li>
+    <section id="how" class="wrap section">
+      <header class="section-head">
+        <p class="kicker">How it works</p>
+        <h2>Three steps, once.</h2>
+        <p>After that, the icon on your home screen is the whole interface.</p>
+      </header>
+      <ol class="steps-grid">
+        <li>
+          <span class="step-no">1</span>
+          <h3>Run the PC app</h3>
+          <p>Install RunContainer on Windows and turn on <strong>Settings → iPhone companion</strong>. It shows a six-digit code and its own web address.</p>
+        </li>
+        <li>
+          <span class="step-no">2</span>
+          <h3>Add this site to your home screen</h3>
+          <p>Use the button above and follow the steps for your phone. From then on it opens full screen, like any other app.</p>
+        </li>
+        <li>
+          <span class="step-no">3</span>
+          <h3>Enter the code</h3>
+          <p>Open the companion, type the code from the PC, and tap Connect. The phone is remembered, so this only happens once.</p>
+        </li>
       </ol>
-      <p id="install-address" class="fineprint" hidden></p>
-      <button id="install-dismiss" class="primary" type="button">Got it</button>
+    </section>
+
+    <section id="what" class="wrap section">
+      <header class="section-head">
+        <p class="kicker">What you get</p>
+        <h2>The PC, in your pocket.</h2>
+      </header>
+      <div class="features">
+        <article>
+          <h3>Every running app</h3>
+          <p>The companion lists what is running in RunContainer on the PC, with live status at a glance.</p>
+        </article>
+        <article>
+          <h3>A real window</h3>
+          <p>Tap an app to see its window live. Touches and scrolling land on the same point on the PC.</p>
+        </article>
+        <article>
+          <h3>Type from the phone</h3>
+          <p>A text field sends what you type, with Enter, Tab, Esc and the arrow keys a tap away.</p>
+        </article>
+        <article>
+          <h3>From anywhere</h3>
+          <p>Runs over Tailscale, so the phone only needs the internet — no port forwarding, no router setup.</p>
+        </article>
+        <article>
+          <h3>Nothing on the phone</h3>
+          <p>The phone is a window and a keyboard. The apps and their data stay on the PC.</p>
+        </article>
+        <article>
+          <h3>Light or dark</h3>
+          <p>Follows the phone, and remembers when you pick one. Nightly builds get their own icon.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="install" class="wrap section">
+      <header class="section-head">
+        <p class="kicker">Install</p>
+        <h2>Put it on your home screen.</h2>
+        <p>No app store and nothing to download on the phone: the icon is this site, opened without the browser around it.</p>
+      </header>
+      <div class="install-grid">
+        <article class="install-card">
+          <h3>iPhone &amp; iPad</h3>
+          <ol>
+            <li>Open this page in <strong>Safari</strong>.</li>
+            <li>Tap <strong>Share</strong> in the toolbar.</li>
+            <li>Choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</li>
+          </ol>
+        </article>
+        <article class="install-card">
+          <h3>Android</h3>
+          <ol>
+            <li>Open this page in <strong>Chrome</strong>.</li>
+            <li>Tap the <strong>&#8942;</strong> menu in the corner.</li>
+            <li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>
+          </ol>
+        </article>
+      </div>
+      <p class="fine">Already added it? Open <strong>RunContainer</strong> from your home screen and enter the code.</p>
+    </section>
+
+    <section id="faq" class="wrap section">
+      <header class="section-head">
+        <p class="kicker">Questions</p>
+        <h2>Good to know.</h2>
+      </header>
+      <div class="faq">
+        <details>
+          <summary>Does the phone run the app?</summary>
+          <p>No. The app runs in RunContainer on the Windows PC. The phone receives the picture and sends touches and keys back; nothing is installed or executed on the phone.</p>
+        </details>
+        <details>
+          <summary>Do I need Tailscale?</summary>
+          <p>Yes, on the PC. RunContainer gives the PC a private <code>https://…ts.net</code> address through Tailscale Funnel, so the phone can reach it from any network. Install Tailscale on Windows, sign in, and the address is offered in <strong>Settings → iPhone companion</strong>.</p>
+        </details>
+        <details>
+          <summary>What if the PC is off?</summary>
+          <p>The companion opens with the last list of apps it saw and says the PC is unreachable. Start RunContainer on the PC, then refresh.</p>
+        </details>
+        <details>
+          <summary>Is it free?</summary>
+          <p>Yes. The companion is part of RunContainer, and there is no account to create on the phone. The pairing code is the only thing you type.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <div class="foot-brand">
+        <img src="/icons/icon-192.png?v=2" alt="" width="30" height="30">
+        <div>
+          <strong>RunContainer Companion</strong>
+          <span>Part of RunContainer for Windows.</span>
+        </div>
+      </div>
+      <div class="foot-links">
+        <a href="https://github.com/RunContainer-7/RunContainer/releases/latest">Download RunContainer</a>
+        <a href="https://github.com/RunContainer-7/RunContainer">Source</a>
+        <a href="/app/">Open the companion</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Mobile only, and never over the page: a nudge, not a gate. -->
+  <div id="install-banner" class="banner" role="region" aria-label="Install the companion" hidden>
+    <img src="/icons/icon-192.png?v=2" alt="" width="38" height="38">
+    <div class="banner-copy">
+      <strong>Keep it on your home screen</strong>
+      <span>Opens full screen, like an app.</span>
+    </div>
+    <button id="banner-install" class="btn small primary" type="button">How</button>
+    <button id="banner-close" class="banner-close" type="button" aria-label="Dismiss">&#215;</button>
+  </div>
+
+  <div id="install-sheet" class="sheet" hidden>
+    <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+      <button id="sheet-close" class="sheet-close" type="button" aria-label="Close">&#215;</button>
+      <strong id="sheet-title">Add RunContainer to your home screen</strong>
+      <div id="sheet-body" class="sheet-body"></div>
+      <button id="sheet-done" class="btn primary" type="button">Got it</button>
     </div>
   </div>
 
-  <script src="/companion.js?v=2"></script>
+  <script src="/site.js?v=1"></script>
 </body>
 </html>
