@@ -4,6 +4,16 @@
 
 export const UPDATES = [
   {
+    version: '0.11.4',
+    date: '2026-11-22',
+    title: 'A real home page for the companion, and screens that switch',
+    changes: [
+      'The companion address is now a proper website: it explains what the companion does, how the phone connects, and prompts you to add it to the Home Screen. The home-screen icon opens the interface itself at /app/, so you land on the pairing code rather than the explanation.',
+      'Fixed the companion laying out all three screens at once. The pairing screen, the app list and the viewer each carry their own display rule, which overrode the hidden attribute; only the current screen is shown now. This applies to the hosted page and to the copy the PC serves on the local network.',
+      'The website and the pairing screen link the documentation and the Discord server, so help is one tap away before and after installation.',
+    ],
+  },
+  {
     version: '0.11.3',
     date: '2026-11-17',
     title: 'One code connects the phone to the hosted companion',
